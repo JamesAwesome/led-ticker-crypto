@@ -257,6 +257,12 @@ class CoinGeckoMonitor:
             session=session,
             **{k: v for k, v in kwargs.items() if k in valid},
         )
+        # Tolerate a failed INITIAL price fetch (e.g. a CoinGecko 429 at boot)
+        # so the widget still constructs and the monitor loop can recover, rather
+        # than the whole widget being skipped for the session. The broad except
+        # also swallows a coding bug in update() — that surfaces only as a
+        # repeating warning log + frozen placeholder data, which is the
+        # acceptable tradeoff for "a data fetch must never crash startup".
         try:
             await widget.update()
         except Exception as e:
