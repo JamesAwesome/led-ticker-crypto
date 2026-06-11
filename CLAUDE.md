@@ -70,9 +70,10 @@ Bare `tuple[int, int, int]` annotations are fine.
 
 **This is a faithful port of core's CoinGecko renderer** — `_ticker_render.draw_price_ticker`
 was ported from `led_ticker.widgets.crypto.coinbase._draw_price_ticker` (coinbase was removed
-from core; the renderer traveled with this plugin). `tools/compare_render.py` proves the renderer
-is pixel-identical to the original. Do not change rendering logic in `_ticker_render.py` without
-re-running that comparison tool and confirming the diff is intentional.
+from core; the renderer traveled with this plugin). Pixel-identity to the original was proven
+during extraction (see PR history); `tools/compare_render.py` served that one-time validation
+purpose and was retired after core's renderer was removed in led-ticker#188. Do not change
+rendering logic in `_ticker_render.py` without confirming the diff is intentional.
 
 **Port adaptations in `_ticker_render.py`** — these are deliberate, documented deviations from
 how the original code was written that must NOT be reverted:
@@ -124,9 +125,9 @@ state) should follow the same pattern: accept in `start()`, don't pass through t
 - `test_coingecko.py` — behavior coverage: price formatting, change coloring, `font_color`
   normalization, `draw()` routing, `update()` logging contract.
 
-`tools/compare_render.py` — standalone comparison tool (not part of pytest). Renders a fixed
-price ticker with both the ported renderer and a reference snapshot and asserts pixel identity.
-Re-run it whenever `_ticker_render.py` changes.
+`tools/compare_render.py` — standalone comparison tool used during extraction to assert pixel
+identity between the ported renderer and core's original. Retired after core's renderer was
+removed in led-ticker#188; see PR history for the comparison baseline.
 
 CI (`.github/workflows/ci.yml`): checks out this repo + led-ticker as siblings (deploy key),
 Python 3.14, `uv sync --extra dev`, then `ruff check src tests` and `pytest -q`.
