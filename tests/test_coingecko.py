@@ -240,3 +240,25 @@ class TestCoinGeckoMonitor:
         )
         assert isinstance(w.feed_stories, list)
         assert all(isinstance(s, Widget) for s in w.feed_stories)
+
+    def test_hold_time_threads_to_stories(self):
+        w = CoinGeckoMonitor(
+            coins=[("BTC", "bitcoin")], currency="USD", session=mock.Mock(), hold_time=4.0
+        )
+        assert all(s.hold_time == 4.0 for s in w.feed_stories)
+
+
+class TestValidateConfig:
+    def test_no_coin_specified_is_rejected(self):
+        msgs = CoinGeckoMonitor.validate_config({"currency": "USD"})
+        assert any("symbol" in m for m in msgs)
+
+    def test_legacy_single_coin_ok(self):
+        assert CoinGeckoMonitor.validate_config(
+            {"symbol": "BTC", "symbol_id": "bitcoin", "currency": "USD"}) == []
+
+    def test_symbols_list_ok(self):
+        assert CoinGeckoMonitor.validate_config({"symbols": ["BTC", "ETH"]}) == []
+
+    def test_symbol_ids_list_ok(self):
+        assert CoinGeckoMonitor.validate_config({"symbol_ids": ["bitcoin"]}) == []

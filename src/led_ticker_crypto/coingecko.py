@@ -44,6 +44,7 @@ class _CoinTicker(FrameAwareBase):
     currency: str
     center: bool = True
     padding: int = 6
+    hold_time: float = 0.0
     bg_color: Color | None = attrs.field(default=None, kw_only=True)
     font_color: Color | ColorProvider = attrs.field(default=None, kw_only=True)
     price_data: dict[str, str] = attrs.field(
@@ -173,11 +174,54 @@ class CoinGeckoMonitor:
                 currency=self.currency,
                 center=self.center,
                 padding=self.padding,
+                hold_time=self.hold_time,
                 bg_color=self.bg_color,
                 font_color=self.font_color,
             )
             for display, _ in self.coins
         ]
+
+    @classmethod
+    def validate_config(cls, cfg: dict[str, Any]) -> list[str]:
+        """Pre-coercion config check, run by the engine via validate_widget_cfg.
+
+        Returns message strings (does NOT raise); the engine turns any returned
+        messages into a pre-flight ValueError.
+        """
+        msgs: list[str] = []
+
+        has_legacy = bool(cfg.get("symbol") or cfg.get("symbol_id"))
+        has_symbols = bool(cfg.get("symbols"))
+        has_symbol_ids = bool(cfg.get("symbol_ids"))
+
+        if not (has_legacy or has_symbols or has_symbol_ids):
+            msgs.append(
+                "crypto.coingecko: specify at least one coin via "
+                "symbol+symbol_id, symbol_ids, or symbols"
+            )
+            return msgs
+
+        if has_symbols:
+            symbols = cfg["symbols"]
+            if not (
+                isinstance(symbols, list)
+                and all(isinstance(s, str) and s for s in symbols)
+            ):
+                msgs.append(
+                    "crypto.coingecko: symbols must be a non-empty list of strings"
+                )
+
+        if has_symbol_ids:
+            symbol_ids = cfg["symbol_ids"]
+            if not (
+                isinstance(symbol_ids, list)
+                and all(isinstance(s, str) and s for s in symbol_ids)
+            ):
+                msgs.append(
+                    "crypto.coingecko: symbol_ids must be a non-empty list of strings"
+                )
+
+        return msgs
 
     def _headers(self) -> dict[str, str]:
         return {"x-cg-demo-api-key": self.api_key} if self.api_key else {}
