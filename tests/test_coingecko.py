@@ -90,9 +90,10 @@ class TestRenderHelpers:
 
 class TestDrawPriceTicker:
     def test_returns_canvas(self, canvas):
+        # center=True by default → cursor lands at canvas.width == 160
         result, pos = draw_price_ticker(canvas, "BTC", "50000.00", "2.55%")
         assert result is canvas
-        assert pos > 0
+        assert pos == 160
 
     def test_centered_fills_canvas(self, canvas):
         _, pos = draw_price_ticker(canvas, "BTC", "50000.00", "2.55%", center=True)
@@ -110,9 +111,10 @@ class TestCoinTicker:
         assert isinstance(story, Widget)
 
     def test_draw_returns_canvas(self, canvas, story):
+        # story uses center=True (default), so cursor lands at canvas.width == 160
         result, pos = story.draw(canvas)
         assert result is canvas
-        assert pos > 0
+        assert pos == 160
 
     def test_default_price_data(self):
         s = _CoinTicker(symbol="BTC")
