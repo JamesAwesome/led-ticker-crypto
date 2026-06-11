@@ -321,6 +321,22 @@ class TestStartResilience:
         assert w.feed_stories[0].price_data["price"] == "0.0000"
 
 
+class TestUpdateRouting:
+    async def test_update_routes_by_coin_id_not_position(self):
+        session = _mock_session({
+            "bitcoin": {"usd": 50000.0, "usd_24h_change": 1.0},
+            "ethereum": {"usd": 3000.0, "usd_24h_change": -2.0},
+        })
+        w = CoinGeckoMonitor(
+            coins=[("BTC", "bitcoin"), ("ETH", "ethereum")], currency="USD", session=session
+        )
+        w.feed_stories.reverse()  # skew order vs coins
+        await w.update()
+        by_sym = {s.symbol: s.price_data["price"] for s in w.feed_stories}
+        assert by_sym["BTC"] == "50,000.0000"
+        assert by_sym["ETH"] == "3,000.0000"
+
+
 class TestCoinGeckoMonitorAdditional:
     """Additional update() and start() tests (Phase-3 coverage gaps)."""
 

@@ -166,6 +166,7 @@ class CoinGeckoMonitor:
     )
     feed_title: None = attrs.field(init=False, default=None)
     feed_stories: list[_CoinTicker] = attrs.field(init=False, factory=list)
+    _story_by_id: dict = attrs.field(init=False, factory=dict)
 
     def __attrs_post_init__(self) -> None:
         self.feed_stories = [
@@ -180,6 +181,9 @@ class CoinGeckoMonitor:
             )
             for display, _ in self.coins
         ]
+        self._story_by_id = {
+            cid: story for (_, cid), story in zip(self.coins, self.feed_stories)
+        }
 
     @classmethod
     def validate_config(cls, cfg: dict[str, Any]) -> list[str]:
@@ -291,10 +295,9 @@ class CoinGeckoMonitor:
 
         cur = self.currency.lower()
         cur_change = f"{cur}_24h_change"
-        by_id = {coin_id: story for (_, coin_id), story in zip(self.coins, self.feed_stories)}
 
         updated = 0
-        for coin_id, story in by_id.items():
+        for coin_id, story in self._story_by_id.items():
             entry = data.get(coin_id)
             if not entry or cur not in entry or cur_change not in entry:
                 logging.warning(
