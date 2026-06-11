@@ -41,7 +41,6 @@ class _CoinTicker(FrameAwareBase):
     """One coin's price line — a Container "story" drawn via draw_price_ticker."""
 
     symbol: str
-    currency: str
     center: bool = True
     padding: int = 6
     hold_time: float = 0.0
@@ -172,7 +171,6 @@ class CoinGeckoMonitor:
         self.feed_stories = [
             _CoinTicker(
                 symbol=display,
-                currency=self.currency,
                 center=self.center,
                 padding=self.padding,
                 hold_time=self.hold_time,

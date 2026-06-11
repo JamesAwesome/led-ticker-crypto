@@ -102,7 +102,7 @@ class TestDrawPriceTicker:
 class TestCoinTicker:
     @pytest.fixture
     def story(self):
-        s = _CoinTicker(symbol="ETH", currency="USD")
+        s = _CoinTicker(symbol="ETH")
         s.price_data = {"price": "3,000.0000", "change_24h": "1.50%"}
         return s
 
@@ -115,7 +115,7 @@ class TestCoinTicker:
         assert pos > 0
 
     def test_default_price_data(self):
-        s = _CoinTicker(symbol="BTC", currency="USD")
+        s = _CoinTicker(symbol="BTC")
         assert s.price_data == {"price": "0.0000", "change_24h": "0.00%"}
 
 
