@@ -311,6 +311,16 @@ def _mock_session_seq(bodies, status=200):
     return session
 
 
+class TestStartResilience:
+    async def test_start_tolerates_initial_price_fetch_failure(self):
+        session = _mock_session({"status": {"error_code": 429}}, status=429)
+        w = await CoinGeckoMonitor.start(
+            symbol="BTC", symbol_id="bitcoin", currency="USD", session=session
+        )
+        assert w is not None
+        assert w.feed_stories[0].price_data["price"] == "0.0000"
+
+
 class TestCoinGeckoMonitorAdditional:
     """Additional update() and start() tests (Phase-3 coverage gaps)."""
 

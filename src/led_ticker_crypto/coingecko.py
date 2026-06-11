@@ -255,7 +255,13 @@ class CoinGeckoMonitor:
             session=session,
             **{k: v for k, v in kwargs.items() if k in valid},
         )
-        await widget.update()
+        try:
+            await widget.update()
+        except Exception as e:
+            logging.warning(
+                "crypto.coingecko initial fetch failed (%s); starting with placeholder data, will retry",
+                e,
+            )
         spawn_tracked(run_monitor_loop(widget, update_interval))
         return widget
 
